@@ -30,7 +30,8 @@ tinkerpatchSupport {
 
     autoBackupApkPath = "${bakPath}"
 
-    appKey = "586959a3a4362075"
+    // TODO: fill in your own appkey from tinkerpatch.com website
+    appKey = ""
     appVersion = "1.0.0"
 
     def pathPrefix = "${bakPath}/${baseInfo}/${variantName}/"

@@ -1,0 +1,74 @@
+import java.text.SimpleDateFormat
+
+apply plugin: 'com.android.application'
+apply plugin: 'tinkerpatch-support'
+
+def bakPath = file("${buildDir}/bakApk/")
+def baseInfo = "app-1.0.0-0525-18-15-27"
+def variantName = "release"
+def fileName = "${android.defaultConfig.applicationId}_${variantName}_V${android.defaultConfig.versionName}_${buildTime()}.apk"
+
+/// Build Function
+static def buildTime() {
+    return new SimpleDateFormat("yyyyMMdd").format(new Date()).toString()
+}
+
+android {
+    defaultConfig {
+        buildConfigField "boolean", "TINKER_ENABLE", "${tinkerpatchSupport.tinkerEnable}"
+    }
+}
+
+/**
+ * @see <a href="http://tinkerpatch.com/Docs/SDK">tinker_patch_support_params</a>
+ */
+tinkerpatchSupport {
+    /** 可以在debug的时候关闭 tinkerPatch **/
+    tinkerEnable = true
+
+    reflectApplication = true
+
+    autoBackupApkPath = "${bakPath}"
+
+    appKey = "586959a3a4362075"
+    appVersion = "1.0.0"
+
+    def pathPrefix = "${bakPath}/${baseInfo}/${variantName}/"
+    def name = "${project.name}-${variantName}"
+
+    baseApkFile = "./app/${fileName}"
+    baseProguardMappingFile = "${pathPrefix}/${name}-mapping.txt"
+    baseResourceRFile = "${pathPrefix}/${name}-R.txt"
+}
+
+/**
+ * @see <a href="https://github.com/Tencent/tinker/wiki/Tinker-%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%97">http://tinkerpatch.params</a>
+ */
+tinkerPatch {
+    ignoreWarning = false
+    useSign = true
+    dex {
+        dexMode = "jar"
+        pattern = ["classes*.dex"]
+        loader = []
+    }
+    lib {
+        pattern = ["lib/*/*.so"]
+    }
+
+    res {
+        pattern = ["res/*", "r/*", "assets/*", "resources.arsc", "AndroidManifest.xml"]
+        ignoreChange = []
+        largeModSize = 100
+    }
+
+    packageConfig {
+    }
+    sevenZip {
+        zipArtifact = "com.tencent.mm:SevenZip:1.1.10"
+//        path = "/usr/local/bin/7za"
+    }
+    buildConfig {
+        keepDexApply = false
+    }
+}
